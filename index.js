@@ -3,30 +3,35 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import mongoose from 'mongoose';
-import todoRoute from "./Routes/todoRoute.js";
+
+import todoRoute from "./routes/todoRoute.js"; 
+import usersRoute from "/Users/jasonhardjawidjaja/Desktop/LABS WADS/AssignmentWeek7/Routes/usersroute"; 
+
+dotenv.config();
 
 const app = express();
-dotenv.config()
+app.use(express.json()); 
+app.use(cors()); 
+app.use(cookieParser()); 
 
-app.use(express.json()); // Built-in body-parser for parsing JSON
-app.use(cors()); // Enable Cross-Origin Resource Sharing
-app.use(cookieParser()); // Enable cookie parsing
+const CONNECTION_URL = process.env.CONNECTION_URL || "mongodb+srv://jasonhardjawidjaja:safeandnewpassword456@cluster0.xekuk.mongodb.net/todolistDB?retryWrites=true&w=majority&appName=Cluster0";
+const PORT = process.env.PORT || 5001;
 
-const CONNECTION_URL = "mongodb+srv://jasonhardjawidjaja:safeandnewpassword456@cluster0.xekuk.mongodb.net/todolistDB?retryWrites=true&w=majority&appName=Cluster0";
+mongoose.set("strictQuery", true);
 
 mongoose.connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(() => console.log("MongoDB connected successfully"))
+    .then(() => {
+        console.log("MongoDB connected successfully");
+
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    })
     .catch((error) => console.error("MongoDB connection error:", error));
 
-app.use("/service/todo", todoRoute)
-mongoose.set("strictQuery", true)
+app.use("/service/todo", todoRoute);
+app.use("/service/user", usersRoute);
 
 app.get("/", (req, res) => {
     res.send("Welcome to the MERN To-Do List Backend!");
-});
-
-// Start the server
-const PORT = 5001;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
 });
